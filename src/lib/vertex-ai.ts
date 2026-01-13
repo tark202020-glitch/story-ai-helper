@@ -98,8 +98,16 @@ export async function importDocuments(gcsUri: string) {
                 const fileName = `manifests/import_${Date.now()}.jsonl`;
                 const file = storage.bucket(bucketName).file(fileName);
 
-                // Content: {"uri": "gs://..."}
-                const manifestContent = JSON.stringify({ uri: gcsUri });
+                // Content: {"content": {"uri": "gs://...", "mimeType": "..."}}
+                const isPdf = gcsUri.toLowerCase().endsWith('.pdf');
+                const mimeType = isPdf ? 'application/pdf' : 'text/plain';
+
+                const manifestContent = JSON.stringify({
+                    content: {
+                        uri: gcsUri,
+                        mimeType: mimeType
+                    }
+                });
 
                 await file.save(manifestContent);
                 importUri = `gs://${bucketName}/${fileName}`;
