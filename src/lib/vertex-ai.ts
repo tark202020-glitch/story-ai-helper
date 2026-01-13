@@ -167,7 +167,6 @@ export async function generateAnswer(question: string): Promise<string> {
             pageSize: 30, // Increased from 10 to capture more context
             contentSearchSpec: {
                 snippetSpec: { returnSnippet: true },
-                extractiveContentSpec: { maxExtractiveAnswerCount: 1, maxExtractiveSegmentCount: 1 }
             },
             summarySpec: {
                 summaryResultCount: 10, // Increased summary sources
