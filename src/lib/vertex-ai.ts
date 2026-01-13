@@ -131,7 +131,7 @@ export async function importDocuments(gcsUri: string) {
 
     console.log(`Triggering import for ${importUri} to ${parent}`);
 
-    const [response] = await client.importDocuments({
+    const [operation] = await client.importDocuments({
         parent,
         gcsSource: {
             inputUris: [importUri],
@@ -139,6 +139,11 @@ export async function importDocuments(gcsUri: string) {
         },
         reconciliationMode: 'INCREMENTAL',
     });
+
+    console.log(`Import operation started: ${operation.name}. Waiting for completion...`);
+    // Wait for the LRO to complete
+    const [response] = await operation.promise();
+    console.log('Import operation completed successfully.');
 
     return response;
 }

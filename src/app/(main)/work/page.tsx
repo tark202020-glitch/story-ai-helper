@@ -55,7 +55,7 @@ export default function WorkPage() {
 
             if (!res.ok) throw new Error('Upload failed');
 
-            setStatus({ type: 'success', message: `${activeTab === 'script' ? 'Script' : 'Treatment'} successfully uploaded and indexed.` });
+            setStatus({ type: 'success', message: 'Import Completed' });
             fetchFiles(); // Refresh list
         } catch (error) {
             console.error(error);
@@ -125,7 +125,7 @@ export default function WorkPage() {
                         isUploading && "opacity-50 cursor-not-allowed"
                     )}
                 >
-                    {isUploading ? 'Uploading...' : 'Select File'}
+                    {isUploading ? 'Importing...' : 'Select File'}
                 </label>
             </div>
 

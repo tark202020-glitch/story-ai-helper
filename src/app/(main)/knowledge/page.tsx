@@ -54,7 +54,7 @@ export default function KnowledgePage() {
 
             if (!res.ok) throw new Error('Upload failed');
 
-            setStatus({ type: 'success', message: 'Knowledge successfully uploaded and indexed.' });
+            setStatus({ type: 'success', message: 'Import Completed' });
             fetchFiles(); // Refresh list
         } catch (error) {
             console.error(error);
@@ -97,7 +97,7 @@ export default function KnowledgePage() {
                         isUploading && "opacity-50 cursor-not-allowed"
                     )}
                 >
-                    {isUploading ? 'Uploading...' : 'Select File'}
+                    {isUploading ? 'Importing...' : 'Select File'}
                 </label>
             </div>
 
