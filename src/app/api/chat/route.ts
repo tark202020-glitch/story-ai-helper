@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json({ answer });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error('Chat Error:', error);
         return NextResponse.json({

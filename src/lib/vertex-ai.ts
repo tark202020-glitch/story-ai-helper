@@ -108,6 +108,7 @@ export async function generateAnswer(question: string): Promise<string> {
                 ignoreAdversarialQuery: true,
                 modelSpec: { version: 'stable' },
             },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any); // Cast to any because TS definition might be missing summarySpec in this version
 
         const results: SearchResult[] = [];
@@ -117,7 +118,9 @@ export async function generateAnswer(question: string): Promise<string> {
         // Let's check the return type of client.search. It usually returns [results, request, response].
 
         let discoverySummary = '';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (searchResponse[2] && (searchResponse[2] as any).summary) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             discoverySummary = (searchResponse[2] as any).summary.summaryText || '';
         }
 

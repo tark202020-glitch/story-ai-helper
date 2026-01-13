@@ -8,11 +8,13 @@ import { cn } from '@/lib/utils';
 export default function KnowledgePage() {
     const [isUploading, setIsUploading] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [files, setFiles] = useState<any[]>([]);
     const [isLoadingFiles, setIsLoadingFiles] = useState(true);
 
     useEffect(() => {
         fetchFiles();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     async function fetchFiles() {
