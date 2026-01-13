@@ -59,6 +59,22 @@ interface SearchResult {
     snippet: string;
 }
 
+import { Storage } from '@google-cloud/storage';
+
+// ... (existing imports)
+
+// ... (existing clients)
+
+function getStorage() {
+    return new Storage({
+        projectId: projectId,
+        credentials: {
+            client_email: clientEmail,
+            private_key: privateKey,
+        },
+    });
+}
+
 export async function importDocuments(gcsUri: string) {
     const client = getDocumentClient();
     const parent = client.projectLocationCollectionDataStoreBranchPath(
@@ -69,12 +85,38 @@ export async function importDocuments(gcsUri: string) {
         'default_branch'
     );
 
-    console.log(`Triggering import for ${gcsUri} to ${parent}`);
+    // If file is not JSONL/NDJSON, create a manifest
+    let importUri = gcsUri;
+    if (!gcsUri.endsWith('.jsonl') && !gcsUri.endsWith('.ndjson')) {
+        console.log(`Creating import manifest for ${gcsUri}...`);
+        try {
+            const storage = getStorage();
+            // Parse bucket and path from gs://bucket/path
+            const match = gcsUri.match(/^gs:\/\/([^\/]+)\/(.+)$/);
+            if (match) {
+                const bucketName = match[1];
+                const fileName = `manifests/import_${Date.now()}.jsonl`;
+                const file = storage.bucket(bucketName).file(fileName);
+
+                // Content: {"uri": "gs://..."}
+                const manifestContent = JSON.stringify({ uri: gcsUri });
+
+                await file.save(manifestContent);
+                importUri = `gs://${bucketName}/${fileName}`;
+                console.log(`Manifest created: ${importUri}`);
+            }
+        } catch (error) {
+            console.error('Failed to create manifest, falling back to direct URI:', error);
+        }
+    }
+
+    console.log(`Triggering import for ${importUri} to ${parent}`);
 
     const [response] = await client.importDocuments({
         parent,
         gcsSource: {
-            inputUris: [gcsUri],
+            inputUris: [importUri],
+            dataSchema: 'document', // For JSONL manifest, 'document' schema tells it to read document metadata/uri from json
         },
         reconciliationMode: 'INCREMENTAL',
     });
