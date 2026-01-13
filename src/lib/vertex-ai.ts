@@ -98,22 +98,31 @@ export async function importDocuments(gcsUri: string) {
                 const fileName = `manifests/import_${Date.now()}.jsonl`;
                 const file = storage.bucket(bucketName).file(fileName);
 
-                // Content: {"id": "...", "content": {"uri": "gs://...", "mimeType": "..."}}
+                // Content: {"id": "...", "structData": { ... }, "content": {"uri": "gs://...", "mimeType": "..."}}
                 const isPdf = gcsUri.toLowerCase().endsWith('.pdf');
                 const mimeType = isPdf ? 'application/pdf' : 'text/plain';
-                const fileId = gcsUri.split('/').pop()?.replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + Date.now();
+                const fileNameClean = gcsUri.split('/').pop() || 'untitled';
+                const fileId = fileNameClean.replace(/[^a-zA-Z0-9_-]/g, '_') + '_' + Date.now();
 
-                const manifestContent = JSON.stringify({
+                // Add structData to ensure 'document_data' is present
+                const manifestObj = {
                     id: fileId,
+                    structData: {
+                        title: fileNameClean,
+                        uri: gcsUri
+                    },
                     content: {
                         uri: gcsUri,
                         mimeType: mimeType
                     }
-                });
+                };
+
+                const manifestContent = JSON.stringify(manifestObj);
+                console.log('Generating JSONL Manifest:', manifestContent);
 
                 await file.save(manifestContent);
                 importUri = `gs://${bucketName}/${fileName}`;
-                console.log(`Manifest created: ${importUri}`);
+                console.log(`Manifest created at: ${importUri}`);
             }
         } catch (error) {
             console.error('Failed to create manifest, falling back to direct URI:', error);
