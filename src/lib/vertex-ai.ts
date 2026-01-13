@@ -164,30 +164,31 @@ export async function generateAnswer(question: string): Promise<string> {
                 'default_search'
             ),
             query: question,
-            pageSize: 10,
+            pageSize: 30, // Increased from 10 to capture more context
             contentSearchSpec: {
                 snippetSpec: { returnSnippet: true },
+                extractiveContentSpec: { maxExtractiveAnswerCount: 1, maxExtractiveSegmentCount: 1 }
             },
             summarySpec: {
-                summaryResultCount: 5,
+                summaryResultCount: 10, // Increased summary sources
                 includeCitations: true,
                 ignoreAdversarialQuery: true,
                 modelSpec: { version: 'stable' },
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any); // Cast to any because TS definition might be missing summarySpec in this version
+        } as any);
 
         const results: SearchResult[] = [];
-        // searchResponse[0] is the results array or the full response depending on destructuring. 
-        // Based on previous logs: searchResponse[0] was the result array.
-        // But summary is usually in the response object.
-        // Let's check the return type of client.search. It usually returns [results, request, response].
-
+        // Extract summary text
         let discoverySummary = '';
+        console.log('--- Vertex AI Search Debug Info ---');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (searchResponse[2] && (searchResponse[2] as any).summary) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             discoverySummary = (searchResponse[2] as any).summary.summaryText || '';
+            console.log('Generative Summary:', discoverySummary);
+        } else {
+            console.log('No Generative Summary returned.');
         }
 
         const searchResults = searchResponse[0];
